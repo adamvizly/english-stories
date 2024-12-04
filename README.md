@@ -6,7 +6,7 @@ This FastAPI application helps users practice English by providing level-appropr
 
 - Generate or retrieve stories based on topic and English proficiency level
 - Stories are tailored to match the user's English level (beginner, intermediate, advanced)
-- Uses Groq AI with Mixtral-8x7b model for high-quality story generation
+- Uses Google's Gemini model for high-quality story generation
 - Persistent storage of stories in SQLite database
 - RESTful API endpoints for story retrieval and generation
 
@@ -24,9 +24,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the root directory and add your Groq API key:
+4. Create a `.env` file in the root directory and add your Gemini API key:
 ```
-GROQ_API_KEY=your_api_key_here
+GOOGLE_API_KEY=your_api_key_here
 ```
 
 ## Running the Application
