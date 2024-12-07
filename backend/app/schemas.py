@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 class EnglishLevel(str, Enum):
     BEGINNER = "beginner"
@@ -21,4 +21,14 @@ class StoryResponse(StoryBase):
 
 class StoryRequest(BaseModel):
     topic: str
+    level: EnglishLevel
+
+class GrammarHintRequest(BaseModel):
+    level: Optional[EnglishLevel] = None
+
+class GrammarHint(BaseModel):
+    title: str
+    explanation: str
+    examples: List[str]
+    practice_exercises: List[str]
     level: EnglishLevel
