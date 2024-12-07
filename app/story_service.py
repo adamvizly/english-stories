@@ -4,6 +4,7 @@ import google.generativeai as genai
 import os
 import logging
 from typing import Optional, List
+from .config import GEMINI_API_KEY
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class StoryService:
     def __init__(self):
-        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        genai.configure(api_key=GEMINI_API_KEY)
         self.ai_model = genai.GenerativeModel("gemini-1.5-flash")
 
     def find_story(self, db: Session, topic: str, level: str) -> Optional[models.Story]:
