@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.routers import auth
 from app.database import Base, engine, SessionLocal, get_db
 from app.models import Story, User  # This ensures all models are loaded
@@ -53,3 +53,17 @@ async def create_story(
         )
     
     return story
+
+@app.get("/stories/", response_model=List[StoryResponse])
+async def list_stories(
+    topic: Optional[str] = Query(None, description="Filter stories by topic"),
+    level: Optional[EnglishLevel] = Query(None, description="Filter stories by English level"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    List all stories with optional filtering by topic and level.
+    Requires authentication.
+    """
+    stories = story_service.list_stories(db, topic, level.value if level else None)
+    return stories
