@@ -14,15 +14,14 @@ const routes = [
     component: () => import('../views/LoginView.vue')
   },
   {
+    path: '/signup',
+    name: 'Signup',
+    component: () => import('../views/SignupView.vue')
+  },
+  {
     path: '/stories',
     name: 'Stories',
     component: () => import('../views/StoriesView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/grammar',
-    name: 'Grammar',
-    component: () => import('../views/GrammarView.vue'),
     meta: { requiresAuth: true }
   }
 ]

@@ -1,81 +1,55 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
-from .database import SessionLocal, engine, Base, get_db
-from .models import Story, User
-from .story_service import StoryService
-from .grammar_service import GrammarService
-from .schemas import StoryRequest, StoryResponse, EnglishLevel, GrammarHintRequest, GrammarHint
-from auth.routes import router as auth_router
-from auth.utils import get_current_user
+from app.routers import auth
+from app.database import Base, engine, SessionLocal, get_db
+from app.models import Story, User  # This ensures all models are loaded
+from app.story_service import StoryService
+from app.schemas import StoryRequest, StoryResponse
+from app.schemas.story import EnglishLevel
+from app.utils.auth import get_current_user
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="English Learning Stories API")
-app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+
+# Configure CORS
+origins = [
+    "http://localhost:5173",  # Vite dev server
+    "http://localhost:4173"   # Vite preview
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(auth.router)  
 
 story_service = StoryService()
-grammar_service = GrammarService()
 
 @app.post("/stories/", response_model=StoryResponse)
-async def get_story(
+async def create_story(
     request: StoryRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get a story based on topic and English proficiency level.
-    First checks the database for existing stories, if none found, generates a new one.
+    Generate a new story based on the provided topic and level.
+    The story will be newly generated each time using AI.
     Requires authentication.
     """
-    # First try to find an existing story
-    story = story_service.find_story(db, request.topic, request.level)
-    
-    # If no story exists, generate a new one
+    story = story_service.generate_story(db, request.topic, request.level.value)
     if not story:
-        story = story_service.generate_story(db, request.topic, request.level)
-        if not story:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to generate story"
-            )
-    
-    return story
-
-@app.get("/stories/", response_model=List[StoryResponse])
-async def list_stories(
-    topic: str = None,
-    level: EnglishLevel = None,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    List all stories, optionally filtered by topic and/or level.
-    Requires authentication.
-    """
-    stories = story_service.list_stories(db, topic, level)
-    
-    return stories
-
-@app.post("/grammar/hint/", response_model=GrammarHint)
-async def get_grammar_hint(
-    request: GrammarHintRequest = GrammarHintRequest(),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get a personalized grammar hint based on the user's English level or requested level.
-    The hint will be newly generated each time using AI.
-    Requires authentication.
-    """
-    # Use requested level if provided, otherwise use user's level
-    level = request.level or EnglishLevel.INTERMEDIATE  # You can add a level field to User model later
-    
-    hint = grammar_service.generate_grammar_hint(level)
-    if not hint:
         raise HTTPException(
             status_code=500,
-            detail="Failed to generate grammar hint"
+            detail="Failed to generate story"
         )
     
-    return hint
+    return story

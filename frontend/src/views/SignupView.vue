@@ -1,10 +1,21 @@
 <template>
-  <div class="login-page">
-    <div class="login-container">
-      <h1>Welcome to English Stories</h1>
-      <p>Please sign in to continue</p>
+  <div class="signup-page">
+    <div class="signup-container">
+      <h1>Create an Account</h1>
+      <p>Join English Stories today</p>
       
-      <form @submit.prevent="handleSubmit" class="login-form">
+      <form @submit.prevent="handleSubmit" class="signup-form">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input
+            type="text"
+            id="name"
+            v-model="name"
+            required
+            placeholder="Enter your name"
+          />
+        </div>
+
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -27,8 +38,8 @@
           />
         </div>
 
-        <button type="submit" :disabled="authStore.loading" class="login-button">
-          {{ authStore.loading ? 'Loading...' : 'Login' }}
+        <button type="submit" :disabled="authStore.loading" class="signup-button">
+          {{ authStore.loading ? 'Loading...' : 'Sign Up' }}
         </button>
       </form>
 
@@ -36,14 +47,14 @@
         <span>OR</span>
       </div>
 
-      <div class="login-buttons">
+      <div class="signup-buttons">
         <GoogleLogin :callback="handleGoogleLogin" />
       </div>
 
       <p v-if="authStore.error" class="error">{{ authStore.error }}</p>
       
       <p class="auth-link">
-        Don't have an account? <router-link to="/signup">Sign up</router-link>
+        Already have an account? <router-link to="/login">Login</router-link>
       </p>
     </div>
   </div>
@@ -58,15 +69,16 @@ import { GoogleLogin } from 'vue3-google-login'
 const authStore = useAuthStore()
 const router = useRouter()
 
+const name = ref('')
 const email = ref('')
 const password = ref('')
 
 const handleSubmit = async () => {
   try {
-    await authStore.loginWithEmail(email.value, password.value)
+    await authStore.signup(email.value, password.value, name.value)
     router.push('/')
   } catch (error) {
-    console.error('Login failed:', error)
+    console.error('Signup failed:', error)
   }
 }
 
@@ -81,7 +93,7 @@ const handleGoogleLogin = async (response) => {
 </script>
 
 <style scoped>
-.login-page {
+.signup-page {
   height: 100vh;
   display: flex;
   align-items: center;
@@ -89,7 +101,7 @@ const handleGoogleLogin = async (response) => {
   background-color: #f5f5f5;
 }
 
-.login-container {
+.signup-container {
   background: white;
   padding: 2rem;
   border-radius: 8px;
@@ -104,7 +116,7 @@ h1 {
   margin-bottom: 1rem;
 }
 
-.login-form {
+.signup-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -130,7 +142,7 @@ input {
   font-size: 1rem;
 }
 
-.login-button {
+.signup-button {
   padding: 0.5rem;
   background-color: #4CAF50;
   color: white;
@@ -140,7 +152,7 @@ input {
   font-size: 1rem;
 }
 
-.login-button:disabled {
+.signup-button:disabled {
   background-color: #ccc;
 }
 
@@ -164,7 +176,7 @@ input {
   font-size: 0.9rem;
 }
 
-.login-buttons {
+.signup-buttons {
   margin-top: 1rem;
 }
 

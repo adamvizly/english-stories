@@ -10,11 +10,6 @@
         <h2>Stories</h2>
         <p>Read and learn from AI-generated stories tailored to your level</p>
       </div>
-      
-      <div class="feature-card" @click="router.push('/grammar')">
-        <h2>Grammar</h2>
-        <p>Get personalized grammar hints and practice exercises</p>
-      </div>
     </main>
   </div>
 </template>

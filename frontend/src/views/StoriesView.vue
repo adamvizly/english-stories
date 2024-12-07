@@ -5,9 +5,9 @@
     <div class="story-controls">
       <select v-model="selectedLevel" class="select-level">
         <option value="">Select Level</option>
-        <option value="BEGINNER">Beginner</option>
-        <option value="INTERMEDIATE">Intermediate</option>
-        <option value="ADVANCED">Advanced</option>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
       </select>
       
       <input 
@@ -27,14 +27,26 @@
     
     <div v-else-if="currentStory" class="story-content">
       <h2>{{ currentStory.title }}</h2>
-      <p>{{ currentStory.content }}</p>
-      <div class="vocabulary">
-        <h3>Vocabulary</h3>
-        <ul>
-          <li v-for="(def, word) in currentStory.vocabulary" :key="word">
-            <strong>{{ word }}</strong>: {{ def }}
-          </li>
-        </ul>
+      <p class="story-text">{{ currentStory.content }}</p>
+      
+      <div v-if="currentStory.grammar_notes?.length" class="grammar-notes">
+        <h3>Grammar Notes</h3>
+        <div 
+          v-for="(note, index) in currentStory.grammar_notes" 
+          :key="index" 
+          class="grammar-note"
+        >
+          <h4>{{ note.concept }}</h4>
+          <p class="explanation">{{ note.explanation }}</p>
+          <div class="examples">
+            <p><strong>Examples:</strong></p>
+            <ul>
+              <li v-for="(example, i) in note.examples" :key="i">
+                {{ example }}
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -60,8 +72,10 @@ const generateStory = async () => {
     const response = await axios.post(
       `${import.meta.env.VITE_API_URL}/stories/`,
       {
-        level: selectedLevel.value,
-        topic: topic.value || undefined
+        title: `${topic.value || 'Random'} Story`,
+        content: '',
+        level: selectedLevel.value.toLowerCase(),
+        topic: topic.value || 'random'
       },
       {
         headers: {
@@ -100,44 +114,98 @@ const generateStory = async () => {
   font-size: 1rem;
 }
 
+.select-level {
+  min-width: 150px;
+}
+
+.topic-input {
+  flex: 1;
+}
+
 .generate-btn {
-  background: #3498db;
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .generate-btn:hover {
-  background: #2980b9;
+  background-color: #45a049;
 }
 
 .loading {
   text-align: center;
-  padding: 2rem;
+  margin: 2rem 0;
+  font-style: italic;
   color: #666;
 }
 
 .story-content {
-  background: white;
+  background: #f9f9f9;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.vocabulary {
+.story-content h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.story-text {
+  line-height: 1.8;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.grammar-notes {
   margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
+  padding-top: 2rem;
+  border-top: 2px solid #e0e0e0;
 }
 
-.vocabulary ul {
-  list-style: none;
-  padding: 0;
+.grammar-notes h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
 }
 
-.vocabulary li {
+.grammar-note {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+.grammar-note h4 {
+  color: #2c3e50;
   margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.explanation {
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.examples {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.examples ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.examples li {
+  margin-bottom: 0.5rem;
+  color: #444;
 }
 </style>

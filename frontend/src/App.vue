@@ -2,7 +2,6 @@
   <nav v-if="isAuthenticated" class="nav">
     <router-link to="/" class="nav-link">Home</router-link>
     <router-link to="/stories" class="nav-link">Stories</router-link>
-    <router-link to="/grammar" class="nav-link">Grammar</router-link>
     <a href="#" @click="logout" class="nav-link logout">Logout</a>
   </nav>
   <router-view/>
@@ -17,8 +16,8 @@ const router = useRouter()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
-const logout = () => {
-  authStore.logout()
+const logout = async () => {
+  await authStore.logout()
   router.push('/login')
 }
 </script>
