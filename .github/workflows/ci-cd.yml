@@ -10,9 +10,6 @@ env:
   REGISTRY: ghcr.io
   FRONTEND_IMAGE_NAME: ${{ github.repository }}-frontend
   BACKEND_IMAGE_NAME: ${{ github.repository }}-backend
-  ENVIRONMENT: production
-  ACCESS_TOKEN_EXPIRE_MINUTES: 30
-  DATABASE_URL: sqlite:///./stories.db
 
 jobs:
   build-and-push:
@@ -50,6 +47,9 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          ENVIRONMENT: production
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          DATABASE_URL: sqlite:///./stories.db
         with:
           push: true
           files: |

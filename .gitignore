@@ -111,3 +111,6 @@ coverage
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+
+docker-compose.override.yml
+docker-compose.dev.yml
