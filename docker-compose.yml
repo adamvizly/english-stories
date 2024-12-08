@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-your-username/your-repo}-frontend:${TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-your-username/your-repo}-backend:${TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -18,7 +18,9 @@ app = FastAPI(title="English Learning Stories API")
 # Configure CORS
 origins = [
     "http://localhost:5173",  # Vite dev server
-    "http://localhost:4173"   # Vite preview
+    "http://localhost:4173",  # Vite preview
+    "http://localhost:80",    # Production frontend
+    "http://localhost"        # Production frontend (alternative)
 ]
 
 app.add_middleware(
