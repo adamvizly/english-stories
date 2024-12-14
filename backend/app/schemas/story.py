@@ -3,9 +3,9 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 class EnglishLevel(str, Enum):
-    BEGINNER = "beginner"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
+    BEGINNER = "BEGINNER"
+    INTERMEDIATE = "INTERMEDIATE"
+    ADVANCED = "ADVANCED"
 
 class GrammarNote(BaseModel):
     concept: str

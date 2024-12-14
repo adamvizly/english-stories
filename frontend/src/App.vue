@@ -2,6 +2,7 @@
   <nav v-if="isAuthenticated" class="nav">
     <router-link to="/" class="nav-link">Home</router-link>
     <router-link to="/stories" class="nav-link">Stories</router-link>
+    <router-link to="/daily-words" class="nav-link">Daily Words</router-link>
     <a href="#" @click="logout" class="nav-link logout">Logout</a>
   </nav>
   <router-view/>

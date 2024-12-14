@@ -1,7 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
+from app.schemas.story import EnglishLevel
 
 class User(Base):
     __tablename__ = "users"
@@ -16,3 +18,6 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime, nullable=True)
+
+    # Relationships
+    daily_words = relationship("DailyWord", back_populates="user")

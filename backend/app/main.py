@@ -1,3 +1,4 @@
+from ast import Str
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -6,9 +7,11 @@ from app.routers import auth
 from app.database import Base, engine, SessionLocal, get_db
 from app.models import Story, User  # This ensures all models are loaded
 from app.story_service import StoryService
+from app.word_service import WordService
 from app.schemas import StoryRequest, StoryResponse
 from app.schemas.story import EnglishLevel
 from app.utils.auth import get_current_user
+from app.schemas.story import EnglishLevel
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -35,6 +38,7 @@ app.add_middleware(
 app.include_router(auth.router)  
 
 story_service = StoryService()
+word_service = WordService()
 
 @app.post("/stories/", response_model=StoryResponse)
 async def create_story(
@@ -69,3 +73,14 @@ async def list_stories(
     """
     stories = story_service.list_stories(db, topic, level.value if level else None)
     return stories
+
+@app.get("/daily-words/")
+async def get_daily_words(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get daily words for the current user.
+    If words haven't been generated for today, generates new ones.
+    """
+    return word_service.get_daily_words(db, current_user)
