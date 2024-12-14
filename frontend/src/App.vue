@@ -1,26 +1,12 @@
 <template>
-  <nav v-if="isAuthenticated" class="nav">
-    <router-link to="/" class="nav-link">Home</router-link>
-    <router-link to="/stories" class="nav-link">Stories</router-link>
-    <router-link to="/daily-words" class="nav-link">Daily Words</router-link>
-    <a href="#" @click="logout" class="nav-link logout">Logout</a>
+  <nav class="nav">
+    <router-link to="/" class="nav-link">Stories</router-link>
+    <router-link to="/words" class="nav-link">Words</router-link>
   </nav>
   <router-view/>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useAuthStore } from './store/auth'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-const authStore = useAuthStore()
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-
-const logout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
 </script>
 
 <style>
@@ -49,24 +35,10 @@ body {
   color: white;
   text-decoration: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s ease;
 }
 
 .nav-link:hover {
   background-color: #34495e;
-}
-
-.router-link-active {
-  background-color: #34495e;
-}
-
-.logout {
-  color: #e74c3c;
-}
-
-.logout:hover {
-  background-color: #c0392b;
-  color: white;
 }
 </style>

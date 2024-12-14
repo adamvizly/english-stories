@@ -25,9 +25,9 @@
         <h2>Generate New Story</h2>
         <select v-model="selectedLevel" class="select-level">
           <option value="">Select Level</option>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
+          <option value="BEGINNER">Beginner</option>
+          <option value="INTERMEDIATE">Intermediate</option>
+          <option value="ADVANCED">Advanced</option>
         </select>
         
         <input 
@@ -76,9 +76,9 @@
       <div class="filters">
         <select v-model="filterLevel" class="select-level">
           <option value="">All Levels</option>
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
+          <option value="BEGINNER">Beginner</option>
+          <option value="INTERMEDIATE">Intermediate</option>
+          <option value="ADVANCED">Advanced</option>
         </select>
         
         <input 
@@ -139,87 +139,137 @@
         No stories found. Try generating a new one!
       </div>
     </div>
+
+    <div v-if="dailyWords.length" class="daily-words">
+      <h2>Daily Words</h2>
+      <div 
+        v-for="(wordData, index) in dailyWords" 
+        :key="index" 
+        class="word-card"
+      >
+        <h3>{{ wordData.word }}</h3>
+        <p><strong>Meaning:</strong> {{ wordData.persian_meaning }}</p>
+        <div v-if="wordData.synonyms && wordData.synonyms.length" class="synonyms">
+          <strong>Synonyms:</strong>
+          <span>{{ wordData.synonyms.join(', ') }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-const currentView = ref('list')
-const selectedLevel = ref('')
-const topic = ref('')
-const loading = ref(false)
-const currentStory = ref(null)
-const stories = ref([])
-const filterLevel = ref('')
-const filterTopic = ref('')
-const loadingMessage = ref('')
+export default {
+  setup() {
+    const topic = ref('')
+    const loading = ref(false)
+    const currentStory = ref(null)
+    const stories = ref([])
+    const dailyWords = ref([])
+    const filterLevel = ref('')
+    const filterTopic = ref('')
+    const loadingMessage = ref('')
+    const selectedLevel = ref('')
+    const currentView = ref('list')
 
-const generateStory = async () => {
-  if (!selectedLevel.value) {
-    alert('Please select a level')
-    return
-  }
-  
-  loading.value = true
-  loadingMessage.value = 'Generating your story...'
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/stories/`,
-      {
-        title: `${topic.value || 'Random'} Story`,
-        content: '',
-        level: selectedLevel.value.toLowerCase(),
-        topic: topic.value || 'random'
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+    const generateStory = async () => {
+      if (!selectedLevel.value) {
+        alert('Please select a level')
+        return
+      }
+      
+      loading.value = true
+      loadingMessage.value = 'Generating your story...'
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/stories/`,
+          {
+            title: `${topic.value || 'Random'} Story`,
+            content: '',
+            level: selectedLevel.value, 
+            topic: topic.value || 'random'
+          }
+        )
+        currentStory.value = response.data
+      } catch (error) {
+        console.error('Failed to generate story:', error)
+        alert('Failed to generate story. Please try again.')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const fetchStories = async () => {
+      loading.value = true
+      loadingMessage.value = 'Loading stories...'
+      try {
+        let url = `${import.meta.env.VITE_API_URL}/stories/`
+        const params = new URLSearchParams()
+        if (filterLevel.value) {
+          params.append('level', filterLevel.value)
         }
-      }
-    )
-    currentStory.value = response.data
-  } catch (error) {
-    console.error('Failed to generate story:', error)
-    alert('Failed to generate story. Please try again.')
-  } finally {
-    loading.value = false
-  }
-}
+        if (filterTopic.value) params.append('topic', filterTopic.value)
+        if (params.toString()) url += `?${params.toString()}`
 
-const fetchStories = async () => {
-  loading.value = true
-  loadingMessage.value = 'Loading stories...'
-  try {
-    let url = `${import.meta.env.VITE_API_URL}/stories/`
-    const params = new URLSearchParams()
-    if (filterLevel.value) params.append('level', filterLevel.value)
-    if (filterTopic.value) params.append('topic', filterTopic.value)
-    if (params.toString()) url += `?${params.toString()}`
-
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        const response = await axios.get(url)
+        stories.value = response.data
+      } catch (error) {
+        console.error('Failed to fetch stories:', error)
+        alert('Failed to load stories. Please try again.')
+      } finally {
+        loading.value = false
       }
+    }
+
+    const fetchDailyWords = async () => {
+      loading.value = true
+      loadingMessage.value = 'Loading daily words...'
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/daily-words/`
+        )
+        // Ensure the response is an array of word objects
+        dailyWords.value = response.data || []
+      } catch (error) {
+        console.error('Failed to fetch daily words:', error)
+        alert('Failed to load daily words. Please try again.')
+        dailyWords.value = [] // Ensure it's an empty array on error
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const viewStory = (story) => {
+      currentStory.value = story
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    onMounted(() => {
+      fetchStories()
+      fetchDailyWords()
     })
-    stories.value = response.data
-  } catch (error) {
-    console.error('Failed to fetch stories:', error)
-    alert('Failed to load stories. Please try again.')
-  } finally {
-    loading.value = false
+
+    return {
+      topic,
+      loading,
+      currentStory,
+      stories,
+      dailyWords,
+      filterLevel,
+      filterTopic,
+      loadingMessage,
+      selectedLevel,
+      currentView,
+      generateStory,
+      fetchStories,
+      fetchDailyWords,
+      viewStory
+    }
   }
 }
-
-const viewStory = (story) => {
-  currentStory.value = story
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-onMounted(() => {
-  fetchStories()
-})
 </script>
 
 <style scoped>
@@ -466,6 +516,27 @@ onMounted(() => {
   color: #666;
   margin-top: 2rem;
   font-style: italic;
+}
+
+.daily-words {
+  margin-top: 2rem;
+}
+
+.word-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+.word-card h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.synonyms {
+  margin-top: 1rem;
 }
 
 @media (max-width: 600px) {

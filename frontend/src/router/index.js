@@ -1,51 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../store/auth'
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../views/HomeView.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../views/LoginView.vue')
-  },
-  {
-    path: '/signup',
-    name: 'Signup',
-    component: () => import('../views/SignupView.vue')
-  },
-  {
-    path: '/stories',
     name: 'Stories',
-    component: () => import('../views/StoriesView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('../views/StoriesView.vue')
   },
   {
-    path: '/daily-words',
-    name: 'DailyWords',
-    component: () => import('../views/DailyWordsView.vue'),
-    meta: { requiresAuth: true }
+    path: '/words',
+    name: 'Words',
+    component: () => import('../views/DailyWordsView.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes
-})
-
-// Navigation guard
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else {
-    next()
-  }
 })
 
 export default router

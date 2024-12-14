@@ -22,7 +22,6 @@ class StoryRequest(StoryBase):
     pass
 
 class StoryResponse(StoryBase):
-    id: int
     grammar_notes: List[GrammarNote]
 
     class Config:
