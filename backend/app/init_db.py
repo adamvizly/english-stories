@@ -1,5 +1,4 @@
 from app.database import Base, engine
-from app.models.auth import User
 from app.models.story import Story
 
 def init_database():

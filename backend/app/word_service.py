@@ -46,7 +46,6 @@ class WordService:
         new_words = []
         for word_data in word_data_list:
             daily_word = DailyWord(
-                user_id=None,  # Remove user-specific association
                 word=word_data.get('word', ''),
                 persian_meaning=word_data.get('persian_meaning', ''),
                 synonyms=word_data.get('synonyms', [])

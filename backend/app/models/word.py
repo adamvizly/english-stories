@@ -7,7 +7,6 @@ class DailyWord(Base):
     __tablename__ = "daily_words"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
     word = Column(String, nullable=False)
     persian_meaning = Column(String, nullable=False)
     synonyms = Column(JSON, nullable=True)  # Store as JSON array
