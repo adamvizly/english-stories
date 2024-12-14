@@ -1,7 +1,8 @@
 import os
 import json
 import google.generativeai as genai
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
+from fastapi import HTTPException
 
 class GeminiService:
     def __init__(self):
@@ -207,3 +208,48 @@ class GeminiService:
             List of grammar note dictionaries
         """
         return self.extract_grammar_notes(story_content)
+
+    def generate_word_with_details(self, level: str = 'BEGINNER') -> Dict[str, Any]:
+        """
+        Generate a word with its details using Gemini AI
+        
+        Args:
+            level (str): Difficulty level of the word (BEGINNER, INTERMEDIATE, ADVANCED)
+        
+        Returns:
+            Dict containing word details
+        """
+        prompt = f"""
+        Generate a unique English word suitable for a {level} level learner. 
+        Provide the following details in a JSON format:
+        {{
+            "word": "The English word",
+            "persian_meaning": "Precise Persian translation",
+            "synonyms": ["Synonym1", "Synonym2"],
+            "example_sentence": "A clear example sentence using the word"
+        }}
+
+        Guidelines:
+        - Choose words that are meaningful and useful
+        - Provide accurate Persian translations
+        - Include 2-3 synonyms
+        - Create an example sentence that helps understand the word's usage
+        """
+
+        try:
+            response = self.model.generate_content(prompt)
+            # Parse the JSON response
+            word_details = json.loads(response.text)
+            
+            return {
+                'word': word_details['word'],
+                'persian_meaning': word_details['persian_meaning'],
+                'synonyms': word_details.get('synonyms', []),
+                'example_sentence': word_details.get('example_sentence', '')
+            }
+        except Exception as e:
+            # Raise an exception instead of returning a fallback word
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Failed to generate word with AI: {str(e)}"
+            )

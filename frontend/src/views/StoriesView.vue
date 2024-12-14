@@ -139,22 +139,6 @@
         No stories found. Try generating a new one!
       </div>
     </div>
-
-    <div v-if="dailyWords.length" class="daily-words">
-      <h2>Daily Words</h2>
-      <div 
-        v-for="(wordData, index) in dailyWords" 
-        :key="index" 
-        class="word-card"
-      >
-        <h3>{{ wordData.word }}</h3>
-        <p><strong>Meaning:</strong> {{ wordData.persian_meaning }}</p>
-        <div v-if="wordData.synonyms && wordData.synonyms.length" class="synonyms">
-          <strong>Synonyms:</strong>
-          <span>{{ wordData.synonyms.join(', ') }}</span>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -168,7 +152,6 @@ export default {
     const loading = ref(false)
     const currentStory = ref(null)
     const stories = ref([])
-    const dailyWords = ref([])
     const filterLevel = ref('')
     const filterTopic = ref('')
     const loadingMessage = ref('')
@@ -224,24 +207,6 @@ export default {
       }
     }
 
-    const fetchDailyWords = async () => {
-      loading.value = true
-      loadingMessage.value = 'Loading daily words...'
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/daily-words/`
-        )
-        // Ensure the response is an array of word objects
-        dailyWords.value = response.data || []
-      } catch (error) {
-        console.error('Failed to fetch daily words:', error)
-        alert('Failed to load daily words. Please try again.')
-        dailyWords.value = [] // Ensure it's an empty array on error
-      } finally {
-        loading.value = false
-      }
-    }
-
     const viewStory = (story) => {
       currentStory.value = story
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -249,7 +214,6 @@ export default {
 
     onMounted(() => {
       fetchStories()
-      fetchDailyWords()
     })
 
     return {
@@ -257,7 +221,6 @@ export default {
       loading,
       currentStory,
       stories,
-      dailyWords,
       filterLevel,
       filterTopic,
       loadingMessage,
@@ -265,7 +228,6 @@ export default {
       currentView,
       generateStory,
       fetchStories,
-      fetchDailyWords,
       viewStory
     }
   }
@@ -516,10 +478,6 @@ export default {
   color: #666;
   margin-top: 2rem;
   font-style: italic;
-}
-
-.daily-words {
-  margin-top: 2rem;
 }
 
 .word-card {

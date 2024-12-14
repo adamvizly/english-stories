@@ -1,70 +1,31 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional
 from app.models.word import DailyWord
+from app.schemas.word import WordRequest, WordResponse
 from app.services.gemini_service import GeminiService
 
 class WordService:
-    def __init__(self):
-        self.gemini = GeminiService()
+    def __init__(self, db: Session, gemini_service: Optional[GeminiService] = None):
+        self.db = db
+        self.gemini = gemini_service or GeminiService()
 
-    def get_daily_words(self, db: Session) -> List[Dict]:
+    def generate_word_with_ai(self, level: str = 'BEGINNER') -> WordResponse:
         """
-        Generate daily words without user-specific context.
-        
-        Args:
-            db (Session): Database session
-        
-        Returns:
-            List of dictionaries containing word details
+        Generate a new word using Gemini AI based on the specified level
         """
-        # Check if words already exist for today
-        today = datetime.now().date()
-        existing_words = (
-            db.query(DailyWord)
-            .filter(DailyWord.created_at >= today)
-            .all()
+        # Use Gemini to generate a word with its details
+        word_details = self.gemini.generate_word_with_details(level)
+
+        # Create the word in the database
+        word_request = WordRequest(
+            word=word_details['word'],
+            persian_meaning=word_details['persian_meaning'],
+            synonyms=word_details.get('synonyms', [])
         )
         
-        if existing_words:
-            return [
-                {
-                    "word": word.word, 
-                    "persian_meaning": word.persian_meaning,
-                    "synonyms": word.synonyms
-                } 
-                for word in existing_words
-            ]
-            
-        # Generate new words using Gemini for a default level
-        try:
-            word_data_list = self.gemini.generate_words("INTERMEDIATE")
-        except Exception as e:
-            print(f"Error generating words: {e}")
-            return []
-        
-        new_words = []
-        for word_data in word_data_list:
-            daily_word = DailyWord(
-                word=word_data.get('word', ''),
-                persian_meaning=word_data.get('persian_meaning', ''),
-                synonyms=word_data.get('synonyms', [])
-            )
-            db.add(daily_word)
-            new_words.append(daily_word)
-        
-        try:
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            print(f"Error saving daily words: {e}")
-            return []
-        
-        return [
-            {
-                "word": word.word, 
-                "persian_meaning": word.persian_meaning,
-                "synonyms": word.synonyms
-            } 
-            for word in new_words
-        ]
+        return WordResponse(
+            word=word_request.word,
+            persian_meaning=word_request.persian_meaning,
+            synonyms=word_request.synonyms
+        )

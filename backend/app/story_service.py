@@ -21,12 +21,12 @@ class StoryService:
             StoryResponse: Generated story
         """
         # Generate grammar notes using Gemini service
-        grammar_notes = self.gemini.extract_grammar_notes_from_content(request.content)
+        story_content, grammar_notes = self.gemini.generate_story_with_grammar_notes(request.topic, request.level)
 
         # Create story model
         story_model = Story(
-            title=request.title,
-            content=request.content,
+            title=request.topic,
+            content=story_content,
             level=request.level,
             topic=request.topic,
             grammar_notes=grammar_notes

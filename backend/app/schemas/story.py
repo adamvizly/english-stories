@@ -19,7 +19,8 @@ class StoryBase(BaseModel):
     topic: str
 
 class StoryRequest(StoryBase):
-    pass
+    topic: str
+    level: EnglishLevel
 
 class StoryResponse(StoryBase):
     grammar_notes: List[GrammarNote]

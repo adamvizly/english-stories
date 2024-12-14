@@ -1,15 +1,28 @@
 <template>
-  <nav class="nav">
-    <router-link to="/" class="nav-link">Stories</router-link>
-    <router-link to="/words" class="nav-link">Words</router-link>
-  </nav>
-  <router-view/>
+  <div id="app">
+    <top-navbar />
+    <router-view class="main-content"/>
+  </div>
 </template>
 
 <script setup>
+import TopNavbar from './components/TopNavbar.vue'
 </script>
 
 <style>
+#app {
+  font-family: 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333;
+  background-color: #f4f4f4;
+  min-height: 100vh;
+}
+
+.main-content {
+  padding-top: 20px;
+}
+
 * {
   margin: 0;
   padding: 0;

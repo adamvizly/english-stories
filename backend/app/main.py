@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from app.database import Base, engine, get_db
 from app.models import Story  # This ensures all models are loaded
@@ -9,6 +9,7 @@ from app.story_service import StoryService
 from app.word_service import WordService
 from app.schemas import StoryRequest, StoryResponse
 from app.schemas.story import EnglishLevel
+from app.schemas.word import WordRequest, WordResponse
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -33,7 +34,7 @@ app.add_middleware(
 )
 
 story_service = StoryService()
-word_service = WordService()
+word_service = WordService(next(get_db()))
 
 @app.post("/stories/", response_model=StoryResponse)
 async def create_story(
@@ -49,23 +50,34 @@ async def create_story(
 @app.get("/stories/", response_model=List[StoryResponse])
 async def list_stories(
     topic: Optional[str] = Query(None, description="Filter stories by topic"),
-    level: Optional[EnglishLevel] = Query(None, description="Filter stories by English level"),
+    level: Optional[str] = Query(None, description="Filter stories by English level"),
     db: Session = Depends(get_db)
 ):
     """
-    List all stories with optional filtering by topic and level.
+    List stories with optional filtering by topic and level.
     """
-    return story_service.list_stories(db, topic, level.value if level else None)
+    return story_service.list_stories(db, topic, level)
 
-@app.get("/daily-words/")
-async def get_daily_words(
+@app.post("/words/")
+async def create_word(
+    word_request: WordRequest,
     db: Session = Depends(get_db)
 ):
     """
-    Get daily words.
-    If words haven't been generated for today, generates new ones.
+    Create a new word manually.
     """
-    return word_service.get_daily_words(db)
+    return word_service.create_word(word_request)
+
+@app.post("/words/generate", response_model=WordResponse)
+async def generate_ai_word(
+    level: str = Query(default='BEGINNER', enum=['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),
+    db: Session = Depends(get_db)
+):
+    """
+    Generate a new word using Gemini AI
+    """
+    word_service = WordService(db)
+    return word_service.generate_word_with_ai(level)
 
 @app.get("/")
 def read_root():

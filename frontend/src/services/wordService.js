@@ -1,11 +1,9 @@
-import api from './api'
+import axios from './axios'
 
 export const wordService = {
-  getDailyWords() {
-    return api.get('/daily-words/')
-  },
-
-  updateEnglishLevel(level) {
-    return api.patch('/users/english-level', { level })
+  generateAIWord(level = 'BEGINNER') {
+    return axios.post('/words/generate', null, {
+      params: { level }
+    })
   }
 }
